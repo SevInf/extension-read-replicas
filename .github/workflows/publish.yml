@@ -10,14 +10,14 @@ concurrency:
 
 jobs:
   build:
-    name: Build
+    name: Build and publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
         with:
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: 'https://registry.npmjs.org'
           node-version: 16
           cache: 'pnpm'
 
@@ -32,6 +32,8 @@ jobs:
         run: pnpm version --no-git-tag-version ${{ github.event.release.tag_name }}
 
       - name: Publish
-        run: pnpm publish --access public --tag latest --no-git-checks
+        run: |
+          pnpm config set "//registry.npmjs.org/:_authToken" "${NPM_TOKEN}"
+          pnpm publish --access public --tag latest --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
